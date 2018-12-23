@@ -1,9 +1,11 @@
 package cn.itcast.day1;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public class ReflectTest {
 
@@ -48,6 +50,54 @@ public class ReflectTest {
 		Method methodCharAt = String.class.getMethod("charAt", int.class);
 		System.out.println(methodCharAt.invoke(str1, 1));
 		System.out.println(methodCharAt.invoke(str1, new Object[] {2}));
+		
+		// TestArguments.main(new String[] {"111", "222", "333"}); // 直接调用main方法
+		
+		// 为什么用反射调用? 因为不知道类的名字, 不知道要执行哪个类
+		String startingClassName = args[0];
+		// 但是我知道这个类里面有一个类方法
+		Method mainMethod = Class.forName(startingClassName).getMethod("main", String[].class);
+		
+		mainMethod.invoke(null, (Object)new String[] {"111", "222", "333"}); // 静态的类不需要传递对象, 所以写null
+		mainMethod.invoke(null, new Object[]{new String[] {"111", "222", "333"}});
+		
+		// 数组反射
+		int[] a1 = new int[3];
+		int[] a2 = new int [4];
+		int[][] a3 = new int[2][3];
+		String[] a4 = new String[4];
+		System.out.println(a1.getClass() == a2.getClass());
+
+		System.out.println(a1.getClass().getName());
+		
+		a1 = new int[] {1,2,3};
+		a4 = new String[] {"a","b","c"};
+		Object aObj1 = a1;
+		Object aObj2 = a4;
+		// Object[] aObj3 = a1; // 这个编译不通过 int[] 本身也是Object[]
+		Object[] aObj4 = a3;
+		Object[] aObj5 = a4;
+		System.out.println(a1);
+		System.out.println(a4); // 想看内容, 可以转换成List
+		System.out.println(Arrays.asList(a1));
+		System.out.println(Arrays.asList(1,2,3)); // asList 接收Object[] 数组
+ 		System.out.println(Arrays.asList(a4)); // 转换成List
+ 		
+ 		Object obj = null;
+ 		printObject(a1);
+	}
+
+	private static void printObject(Object obj) { // 数组的反射
+		Class clazz = obj.getClass();
+		if(clazz.isArray()) {
+			int len = Array.getLength(obj);
+			for(int i = 0; i < len; i++) {
+				System.out.println(Array.get(obj, i));
+			}
+		} else {
+			System.out.println(obj);
+		}
+		
 	}
 
 	private static void changeStringValue(Object obj) throws Exception {
@@ -67,5 +117,9 @@ public class ReflectTest {
 }
 
 class TestArguments{
-	public static void main(String)
+	public static void main(String[] args) {
+		for(String arg : args) {
+			System.out.println(arg);
+		}
+	}
 }
